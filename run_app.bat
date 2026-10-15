@@ -1,0 +1,9 @@
+@echo off
+setlocal
+set TF_CPP_MIN_LOG_LEVEL=1
+set TF_ENABLE_ONEDNN_OPTS=0
+set OMP_NUM_THREADS=1
+set TF_NUM_INTRAOP_THREADS=1
+set TF_NUM_INTEROP_THREADS=1
+python app.py
+endlocal

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Hasil Analisis Aktivitas{% endblock %}
+{% block content %}
+<section class="toolbar">
+  <a href="{{ url_for('index') }}" class="button secondary">← Kembali</a>
+  <a href="{{ url_for('download', filename=download_name) }}" class="button primary">Unduh CSV Hasil</a>
+</section>
+
+<section class="card conclusion-card {{ conclusion.tone if conclusion else '' }}">
+  <div class="conclusion-head">
+    <div>
+      <p class="metric-label">Kesimpulan otomatis</p>
+      <h2>{{ conclusion.title }}</h2>
+    </div>
+    <span class="badge {{ 'ok' if conclusion.tone == 'ok' else 'warn' }}">{{ conclusion.status }}</span>
+  </div>
+  <p class="lead">{{ conclusion.summary }}</p>
+  <div class="grid two-col-narrow">
+    <div>
+      <h3>Mengapa sistem menyimpulkan begitu?</h3>
+      <ul class="plain-list bullet-list compact">
+        {% for reason in conclusion.reasons %}
+          <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3>Saran singkat</h3>
+      <p>{{ conclusion.recommendation }}</p>
+      <p class="muted small">{{ conclusion.disclaimer }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="grid metrics-grid">
+  <article class="metric-card">
+    <p class="metric-label">Rata-rata intensitas</p>
+    <h2>{{ summary.average_met }} MET</h2>
+  </article>
+  <article class="metric-card">
+    <p class="metric-label">Perkiraan kalori</p>
+    <h2>{{ summary.total_kcal }} kcal</h2>
+  </article>
+  <article class="metric-card">
+    <p class="metric-label">Durasi yang dianalisis</p>
+    <h2>{{ summary.covered_duration_text }}</h2>
+  </article>
+  <article class="metric-card">
+    <p class="metric-label">Jumlah potongan analisis</p>
+    <h2>{{ summary.total_windows }}</h2>
+  </article>
+</section>
+
+<section class="grid three-col">
+  {% for item in explanation_cards %}
+  <div class="card small-card">
+    <h3>{{ item.title }}</h3>
+    <p class="muted">{{ item.text }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="grid two-col">
+  <div class="card">
+    <h2>Ringkasan Data</h2>
+    <table class="info-table">
+      <tbody>
+        <tr><th>Nama file</th><td>{{ input_info.filename }}</td></tr>
+        <tr><th>Jumlah baris awal</th><td>{{ input_info.raw_rows }}</td></tr>
+        <tr><th>Jumlah baris setelah dibersihkan</th><td>{{ input_info.clean_rows }}</td></tr>
+        <tr><th>MET terendah</th><td>{{ summary.min_met }}</td></tr>
+        <tr><th>MET tertinggi</th><td>{{ summary.max_met }}</td></tr>
+      </tbody>
+    </table>
+
+    {% if warnings %}
+      <div class="notice warn-box">
+        <h3>Catatan proses data</h3>
+        <ul class="plain-list compact bullet-list">
+          {% for warning in warnings %}
+            <li>{{ warning }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Profil BMI</h2>
+    <table class="info-table">
+      <tbody>
+        <tr><th>Berat badan</th><td>{{ bmi_profile.weight_kg }} kg</td></tr>
+        <tr><th>Tinggi badan</th><td>{{ bmi_profile.height_cm }} cm</td></tr>
+        <tr><th>Umur</th><td>{{ bmi_profile.age_years }} tahun</td></tr>
+        <tr><th>Nilai BMI</th><td>{{ bmi_profile.bmi }}</td></tr>
+        <tr><th>Kategori BMI</th><td>{{ bmi_profile.category }}</td></tr>
+      </tbody>
+    </table>
+    <p class="muted">{{ bmi_profile.age_note }}</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Pembagian Intensitas Aktivitas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Kategori</th>
+        <th>Durasi</th>
+        <th>Persentase</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in intensity_rows %}
+        <tr>
+          <td>{{ row.label }}</td>
+          <td>{{ row.duration_text }}</td>
+          <td>{{ row.percent }}%</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Contoh Hasil per Potongan Waktu</h2>
+  <p class="muted">Di bawah ini ditampilkan maksimal 30 potongan waktu pertama. File lengkap bisa diunduh sebagai CSV.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Potongan</th>
+          <th>Mulai (detik)</th>
+          <th>Selesai (detik)</th>
+          <th>Durasi efektif</th>
+          <th>Prediksi MET</th>
+          <th>Intensitas</th>
+          <th>Perkiraan kalori</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in preview_rows %}
+          <tr>
+            <td>{{ row.window }}</td>
+            <td>{{ row.start_time_sec }}</td>
+            <td>{{ row.end_time_sec }}</td>
+            <td>{{ row.effective_duration_sec }}</td>
+            <td>{{ row.predicted_met }}</td>
+            <td>{{ row.intensity }}</td>
+            <td>{{ row.kcal_contribution }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

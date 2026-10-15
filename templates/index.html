@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Input Data Aktivitas{% endblock %}
+{% block content %}
+<section class="grid two-col">
+  <div class="card">
+    <h2>Masukkan Data Pengguna</h2>
+    <form action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data" class="form-grid">
+      <label>
+        <span>Berat badan (kg) <strong>*</strong></span>
+        <input type="number" name="weight_kg" step="0.1" min="1" value="{{ default_weight }}" required>
+      </label>
+
+      <label>
+        <span>Tinggi badan (cm) <strong>*</strong></span>
+        <input type="number" name="height_cm" step="0.1" min="1" value="{{ default_height }}" required>
+      </label>
+
+      <label>
+        <span>Umur (tahun) <strong>*</strong></span>
+        <input type="number" name="age_years" step="1" min="1" value="{{ default_age }}" required>
+      </label>
+
+      <label class="full-width">
+        <span>Upload file CSV sensor <strong>*</strong></span>
+        <input type="file" name="sensor_csv" accept=".csv" required>
+      </label>
+
+      <div class="note full-width">
+        <p><strong>Catatan penting:</strong> berat badan dipakai untuk menghitung perkiraan kalori. Tinggi badan dan umur hanya dipakai untuk menampilkan profil BMI, bukan untuk memengaruhi prediksi model.</p>
+      </div>
+
+      <button type="submit" class="button primary full-width">Analisis Aktivitas Saya</button>
+    </form>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2>Status Sistem</h2>
+      <ul class="status-list">
+        <li>
+          <span>File model tersedia</span>
+          <strong class="badge {{ 'ok' if status.model_exists else 'warn' }}">{{ 'Ya' if status.model_exists else 'Belum' }}</strong>
+        </li>
+        <li>
+          <span>File scaler tersedia</span>
+          <strong class="badge {{ 'ok' if status.scaler_exists else 'warn' }}">{{ 'Ya' if status.scaler_exists else 'Belum' }}</strong>
+        </li>
+      </ul>
+      <p class="muted">Jika kedua file tersedia, website siap menganalisis aktivitas dari file CSV yang Anda unggah.</p>
+    </div>
+
+    <div class="card">
+      <h2>Format File yang Dibutuhkan</h2>
+      <p>File CSV perlu memiliki kolom berikut:</p>
+      <div class="chips">
+        {% for col in required_features %}
+          <span class="chip">{{ col }}</span>
+        {% endfor %}
+      </div>
+      <p class="muted">Kolom tambahan seperti <code>timestamp</code> dan <code>activity_id</code> boleh ada, tetapi tidak wajib.</p>
+    </div>
+
+    <div class="card">
+      <h2>Hasil yang Akan Ditampilkan</h2>
+      <ul class="plain-list bullet-list">
+        <li>Rata-rata intensitas aktivitas</li>
+        <li>Perkiraan kalori yang dikeluarkan</li>
+        <li>Pembagian aktivitas ringan, sedang, dan berat</li>
+        <li>Profil BMI pengguna</li>
+        <li>Kesimpulan otomatis: kurang efektif, sudah cukup, sudah baik, atau terlalu berat</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}
